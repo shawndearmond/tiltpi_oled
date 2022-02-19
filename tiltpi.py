@@ -3,7 +3,8 @@ import sys
 sys.path.append('./drive')
 import SPI
 import SSD1305
-import json
+import csv
+import datetime
 
 from PIL import Image
 from PIL import ImageDraw
@@ -98,13 +99,17 @@ while True:
     # cmd = "df -h | awk '$NF==\"/\"{printf \"Disk: %d/%dGB %s\", $3,$2,$5}'"
     # Disk = subprocess.check_output(cmd, shell = True )
 
-    with open ("global.json") as file:
-        data = json.load(file)
-        beer = data["Beer"][0]
-        grav = data["SG"]
-        temp = data["Temp"]
+    with open ("/home/pi/log.csv") as file:
+        for line in (file.readlines() [-4:]):
+            reader = csv.reader(line)
+            for row in reader:
+                beer = row[3]
+                when = datetime.strptime(row[0], '%-m/%-d/%Y  %-H:%M:%S')
+                grav = row[3]
+                temp = row[2]
+                draw.text((x, top), str(beer) + ": " +  str(grav) + ", " + str(temp) + "F, " + when.stftime("%-I"),  font=font, fill=255)
     # Write two lines of text.
-    draw.text((x, top),       str(beer) + ": " +  str(grav) + ", " + str(temp) + "F",  font=font, fill=255)
+    #draw.text((x, top),       str(beer) + ": " +  str(grav) + ", " + str(temp) + "F",  font=font, fill=255)
     # draw.text((x, top+8),     str(CPU), font=font, fill=255)
     # draw.text((x, top+16),    str(MemUsage),  font=font, fill=255)
     # draw.text((x, top+25),    str(Disk),  font=font, fill=255)
@@ -112,4 +117,4 @@ while True:
     # Display image.
     disp.image(image)
     disp.display()
-    time.sleep(.1)
+    time.sleep(1)
